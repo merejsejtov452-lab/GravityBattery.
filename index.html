@@ -1,0 +1,439 @@
+
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity Storage Calculator</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 30px 15px;
+    font-family: Arial, sans-serif;
+    background: #0b1220;
+    color: #f1f5f9;
+}
+
+.container {
+    max-width: 850px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    color: #4ade80;
+}
+
+.subtitle {
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+
+.panel {
+    background: #151f30;
+    border: 1px solid #29374c;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 20px;
+}
+
+h2 {
+    color: #4ade80;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+.input-group {
+    margin-bottom: 17px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    border: 1px solid #475569;
+    background: #0b1220;
+    color: white;
+    font-size: 16px;
+}
+
+input:focus {
+    outline: 1px solid #4ade80;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 9px;
+    background: #22c55e;
+    color: #07130b;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4ade80;
+}
+
+.results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+}
+
+.result {
+    background: #0b1220;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 17px;
+}
+
+.result-name {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.result-value {
+    color: #4ade80;
+    font-size: 23px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.result-unit {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.note {
+    background: #292414;
+    border: 1px solid #a16207;
+    color: #fde68a;
+    padding: 15px;
+    border-radius: 9px;
+    line-height: 1.6;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+.formula {
+    color: #cbd5e1;
+    line-height: 1.9;
+    font-size: 14px;
+}
+
+.error {
+    color: #f87171;
+    margin-top: 12px;
+    display: none;
+}
+
+footer {
+    text-align: center;
+    color: #64748b;
+    margin-top: 25px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Gravity Storage Calculator</h1>
+<p class="subtitle">
+Гравитациялық энергия сақтау жүйесінің калькуляторы
+</p>
+
+<div class="panel">
+<h2>Жүйе параметрлері</h2>
+
+<div class="input-group">
+<label>Жүк массасы (кг)</label>
+<input type="number" id="mass" value="5000000" min="1">
+</div>
+
+<div class="input-group">
+<label>Шахтаның тереңдігі (м)</label>
+<input type="number" id="depth" value="1000" min="1">
+</div>
+
+<div class="input-group">
+<label>Пайдаланылмайтын жоғарғы бөлік (м)</label>
+<input type="number" id="upper" value="64" min="0">
+</div>
+
+<div class="input-group">
+<label>Қауіпсіздік аралығы (м)</label>
+<input type="number" id="clearance" value="36" min="0">
+</div>
+
+<div class="input-group">
+<label>Түсу жылдамдығы (м/с)</label>
+<input type="number" id="velocity" value="2" min="0.01" step="0.1">
+</div>
+
+</div>
+
+<div class="panel">
+<h2>Қосымша параметрлер</h2>
+
+<div class="input-group">
+<label>Жүк диаметрі (м)</label>
+<input type="number" id="diameter" value="5" min="0.01" step="0.1">
+</div>
+
+<div class="input-group">
+<label>Ауа кедергі коэффициенті (Cd)</label>
+<input type="number" id="cd" value="0.8" min="0" step="0.01">
+</div>
+
+<div class="input-group">
+<label>Генератор ПӘК-і (%)</label>
+<input type="number" id="generator" value="90" min="0.01" max="100">
+</div>
+
+<div class="input-group">
+<label>Қозғалтқыш ПӘК-і (%)</label>
+<input type="number" id="motor" value="90" min="0.01" max="100">
+</div>
+
+<button onclick="calculate()">Есептеу</button>
+<p class="error" id="error">Қате! Параметрлерді тексеріңіз.</p>
+</div>
+
+<div class="panel">
+<h2>Есептеу нәтижелері</h2>
+
+<div class="results">
+
+<div class="result">
+<div class="result-name">Пайдалы биіктік</div>
+<div class="result-value" id="height">-</div>
+<div class="result-unit">м</div>
+</div>
+
+<div class="result">
+<div class="result-name">Потенциалдық энергия</div>
+<div class="result-value" id="energy">-</div>
+<div class="result-unit">МВт·сағ</div>
+</div>
+
+<div class="result">
+<div class="result-name">Ауа кедергі күші</div>
+<div class="result-value" id="drag">-</div>
+<div class="result-unit">Н</div>
+</div>
+
+<div class="result">
+<div class="result-name">Ауа кедергісінен энергия шығыны</div>
+<div class="result-value" id="loss">-</div>
+<div class="result-unit">МВт·сағ</div>
+</div>
+
+<div class="result">
+<div class="result-name">Механикалық энергия</div>
+<div class="result-value" id="mechanical">-</div>
+<div class="result-unit">МВт·сағ</div>
+</div>
+
+<div class="result">
+<div class="result-name">Түсу қуаты</div>
+<div class="result-value" id="power">-</div>
+<div class="result-unit">МВт</div>
+</div>
+
+<div class="result">
+<div class="result-name">Түсу уақыты</div>
+<div class="result-value" id="time">-</div>
+<div class="result-unit">секунд</div>
+</div>
+
+<div class="result">
+<div class="result-name">Жалпы цикл ПӘК-і</div>
+<div class="result-value" id="efficiency">-</div>
+<div class="result-unit">%</div>
+</div>
+
+</div>
+
+<div class="note">
+<strong>Ескерту:</strong> Бұл — идеалдандырылған есептік модель.
+Ауа кедергісі цилиндр пішінді жүкке арналған жуықтау арқылы есептеледі.
+Нақты жүйенің КПД-сі үйкеліс, механизмдер, кабельдер және басқа
+энергия шығындарына да байланысты.
+Қозғалтқыш пен генератордың ПӘК мәндері бастапқы есептік болжамдар болып табылады.
+</div>
+</div>
+
+<div class="panel">
+<h2>Қолданылған формулалар</h2>
+
+<div class="formula">
+<strong>1. Пайдалы биіктік:</strong><br>
+h = H − h₁ − h₂
+
+<br><br>
+
+<strong>2. Потенциалдық энергия:</strong><br>
+E = m × g × h
+
+<br><br>
+
+<strong>3. Ауа кедергі күші:</strong><br>
+F = ½ × ρ × Cd × A × v²
+
+<br><br>
+
+<strong>4. Ауа кедергісінен энергия шығыны:</strong><br>
+E_loss = F × h
+
+<br><br>
+
+<strong>5. Механикалық энергия:</strong><br>
+E_mechanical = E − E_loss
+
+<br><br>
+
+<strong>6. Жалпы цикл ПӘК-і:</strong><br>
+η = η_motor × η_generator × η_mechanical
+
+<br><br>
+
+<strong>7. Түсу уақыты:</strong><br>
+t = h / v
+
+<br><br>
+
+g = 9.81 м/с²; ρ = 1.225 кг/м³.
+</div>
+</div>
+
+<footer>
+Gravity Energy Storage Research Project
+</footer>
+
+</div>
+
+<script>
+function calculate() {
+
+    const mass = Number(document.getElementById("mass").value);
+    const depth = Number(document.getElementById("depth").value);
+    const upper = Number(document.getElementById("upper").value);
+    const clearance = Number(document.getElementById("clearance").value);
+    const velocity = Number(document.getElementById("velocity").value);
+    const diameter = Number(document.getElementById("diameter").value);
+    const cd = Number(document.getElementById("cd").value);
+    const generator = Number(document.getElementById("generator").value);
+    const motor = Number(document.getElementById("motor").value);
+
+    const error = document.getElementById("error");
+
+    const values = [
+        mass, depth, upper, clearance, velocity,
+        diameter, cd, generator, motor
+    ];
+
+    if (
+        values.some(x => !Number.isFinite(x)) ||
+        mass <= 0 ||
+        depth <= 0 ||
+        upper < 0 ||
+        clearance < 0 ||
+        velocity <= 0 ||
+        diameter <= 0 ||
+        cd < 0 ||
+        generator <= 0 || generator > 100 ||
+        motor <= 0 || motor > 100 ||
+        depth - upper - clearance <= 0
+    ) {
+        error.style.display = "block";
+        return;
+    }
+
+    error.style.display = "none";
+
+    const g = 9.81;
+    const rho = 1.225;
+
+    // Пайдалы биіктік
+    const h = depth - upper - clearance;
+
+    // Потенциалдық энергия, Джоуль
+    const energyJ = mass * g * h;
+
+    // Ауданы, м²
+    const radius = diameter / 2;
+    const area = Math.PI * radius * radius;
+
+    // Ауа кедергі күші, Ньютон
+    const dragForce = 0.5 * rho * cd * area * velocity * velocity;
+
+    // Ауа кедергісінен энергия шығыны
+    const lossJ = dragForce * h;
+
+    // Механикалық энергиядан қалған бөлік
+    const mechanicalJ = Math.max(0, energyJ - lossJ);
+
+    // Механикалық тиімділік
+    const mechanicalEfficiency = mechanicalJ / energyJ;
+
+    // Двигатель және генератор тиімділігі
+    const motorEfficiency = motor / 100;
+    const generatorEfficiency = generator / 100;
+
+    // Жалпы цикл КПД
+    const totalEfficiency =
+        motorEfficiency *
+        generatorEfficiency *
+        mechanicalEfficiency;
+
+    // Механикалық энергия, МВт·сағ
+    const energyMWh = energyJ / 3600000000;
+    const lossMWh = lossJ / 3600000000;
+    const mechanicalMWh = mechanicalJ / 3600000000;
+
+    // Түсу қуаты
+    const powerMW = mechanicalJ / h * velocity / 1000000;
+
+    // Түсу уақыты
+    const time = h / velocity;
+
+    function format(value, digits = 3) {
+        return value.toLocaleString("en-US", {
+            maximumFractionDigits: digits
+        });
+    }
+
+    document.getElementById("height").textContent = format(h, 2);
+    document.getElementById("energy").textContent = format(energyMWh, 4);
+    document.getElementById("drag").textContent = format(dragForce, 2);
+    document.getElementById("loss").textContent = format(lossMWh, 6);
+    document.getElementById("mechanical").textContent = format(mechanicalMWh, 4);
+    document.getElementById("power").textContent = format(powerMW, 4);
+    document.getElementById("time").textContent = format(time, 2);
+    document.getElementById("efficiency").textContent =
+        format(totalEfficiency * 100, 2) + "%";
+}
+
+// Автоматты алғашқы есептеу
+calculate();
+</script>
+
+</body>
+</html>
